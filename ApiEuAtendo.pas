@@ -1380,11 +1380,11 @@ begin
         // Analisar a resposta JSON e extrair o status da mensagem
         ResponseJSON := TJSONObject.ParseJSONValue(Response) as TJSONArray;
         try
-          if (ResponseJSON.Count > 0) and (ResponseJSON.Items[0] is TJSONObject) then
-          begin
-            MessageStatusJSON := ResponseJSON.Items[0] as TJSONObject;
-            Result := MessageStatusJSON.GetValue<string>('status');
-          end;
+          if (ResponseJSON.Count > 0) and (ResponseJSON.Items[ResponseJSON.Count - 1] is TJSONObject) then
+            begin
+              MessageStatusJSON := ResponseJSON.Items[ResponseJSON.Count - 1] as TJSONObject;
+              Result := MessageStatusJSON.GetValue<string>('status');
+            end;
         finally
           ResponseJSON.Free;
         end;
