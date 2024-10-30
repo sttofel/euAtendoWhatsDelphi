@@ -173,7 +173,6 @@ end;
     function GetVersion: TVersionOption;
     procedure SetVersion(const Value: TVersionOption);
     function GetMimeTypeByExtension(const FileName: string): string;
-
   protected
     procedure DoStatusInstancia(const InstanceStatus: TInstanceStatus);
     procedure DoCriarInstancia(const InstanceResponse: TInstanceResponse);
@@ -181,6 +180,7 @@ end;
     procedure DoObterContatos(const Contatos: TContatos);
     function GetVersao: string;
   public
+  function FazerLigacao(NumeroTelefone: String; Duracao: integer): String;
    procedure EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao,
       RodapeBotao: string; const Botoes: array of TButtonTipo);
    function CriarInstancia(out ErrorMsg: string): Boolean;
@@ -1500,6 +1500,60 @@ begin
 
 
 
+end;
+
+
+function TApiEuAtendo.FazerLigacao(NumeroTelefone: String; Duracao: integer): String;
+var
+  HTTP: TIdHTTP;
+  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  JSONToSend: TJSONObject;
+  TextMessageJSON, OptionsJSON: TJSONObject;
+  PostDataStream: TStringStream;
+  Response: string;
+  ResponseJSON, KeyJSON: TJSONObject;
+begin
+    if FVersion = TVersionOption.V2 then
+    begin
+     Result := '';  // Assume failure by default
+      HTTP := TIdHTTP.Create(nil);
+      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
+      try
+         SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+        HTTP.IOHandler := SSL;
+        HTTP.Request.ContentType := 'application/json';
+        HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+        JSONToSend := TJSONObject.Create;
+        try
+          JSONToSend.AddPair('number', NumeroTelefone);
+          //JSONToSend.AddPair('isVideo', 'false');
+          JSONToSend.AddPair('callDuration', TJSONNumber.Create(Duracao));
+
+          PostDataStream := TStringStream.Create(JSONToSend.ToString, TEncoding.UTF8);
+          try
+            Response := HTTP.Post(FEvolutionApiURL + '/call/offer/' + FNomeInstancia, PostDataStream);
+            // Analisar a resposta JSON e extrair o ID da mensagem
+            ResponseJSON := TJSONObject.ParseJSONValue(Response) as TJSONObject;
+            try
+             if Assigned(ResponseJSON) and ResponseJSON.TryGetValue<string>('id', Result) then
+              begin
+                Result := Result;
+              end;
+            finally
+              ResponseJSON.Free;
+            end;
+          finally
+            PostDataStream.Free;
+          end;
+        finally
+          JSONToSend.Free;
+        end;
+      finally
+        SSL.Free;
+        HTTP.Free;
+      end;
+    end;
 end;
 
 function TApiEuAtendo.CriarInstancia(out ErrorMsg: string): Boolean;
