@@ -2218,44 +2218,81 @@ var
   PostDataStream: TStringStream;
   Response: string;
 begin
-  Result := False;  // Assume failure by default
-  NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
-  HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-  try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
-    HTTP.IOHandler := SSL;
-    HTTP.Request.ContentType := 'application/json';
-    HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
-    JSONToSend := TJSONObject.Create;
-    try
-      JSONToSend.AddPair('number', NumeroTelefone);
-      OptionsJSON := TJSONObject.Create;
-      OptionsJSON.AddPair('delay', TJSONNumber.Create(1200));
-      OptionsJSON.AddPair('presence', 'composing');
-      JSONToSend.AddPair('options', OptionsJSON);
-      ListMessageJSON := TJSONObject.Create;
-      ListMessageJSON.AddPair('title', Titulo);
-      ListMessageJSON.AddPair('description', Descricao);
-      ListMessageJSON.AddPair('buttonText', TextoBotao);
-      ListMessageJSON.AddPair('footerText', TextoRodape);
-      ListMessageJSON.AddPair('sections', Secoes);
-      JSONToSend.AddPair('listMessage', ListMessageJSON);
-      PostDataStream := TStringStream.Create(JSONToSend.ToString, TEncoding.UTF8);
+
+   if FVersion = TVersionOption.V1 then
+   begin
+     Result := False;  // Assume failure by default
+      NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
+      HTTP := TIdHTTP.Create(nil);
+      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
       try
-        Response := HTTP.Post(FEvolutionApiURL + '/message/sendList/' + FNomeInstancia, PostDataStream);
-        if HTTP.ResponseCode = 201 then
-          Result := True;
+        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+        HTTP.IOHandler := SSL;
+        HTTP.Request.ContentType := 'application/json';
+        HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+        JSONToSend := TJSONObject.Create;
+        try
+          JSONToSend.AddPair('number', NumeroTelefone);
+          OptionsJSON := TJSONObject.Create;
+          OptionsJSON.AddPair('delay', TJSONNumber.Create(1200));
+          OptionsJSON.AddPair('presence', 'composing');
+          JSONToSend.AddPair('options', OptionsJSON);
+          ListMessageJSON := TJSONObject.Create;
+          ListMessageJSON.AddPair('title', Titulo);
+          ListMessageJSON.AddPair('description', Descricao);
+          ListMessageJSON.AddPair('buttonText', TextoBotao);
+          ListMessageJSON.AddPair('footerText', TextoRodape);
+          ListMessageJSON.AddPair('sections', Secoes);
+          JSONToSend.AddPair('listMessage', ListMessageJSON);
+          PostDataStream := TStringStream.Create(JSONToSend.ToString, TEncoding.UTF8);
+          try
+            Response := HTTP.Post(FEvolutionApiURL + '/message/sendList/' + FNomeInstancia, PostDataStream);
+            if HTTP.ResponseCode = 201 then
+              Result := True;
+          finally
+            PostDataStream.Free;
+          end;
+        finally
+          JSONToSend.Free;
+        end;
       finally
-        PostDataStream.Free;
+        SSL.Free;
+        HTTP.Free;
       end;
-    finally
-      JSONToSend.Free;
+   end
+   else
+   begin
+    Result := False;  // Assume failure by default
+      NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
+      HTTP := TIdHTTP.Create(nil);
+      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      try
+        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+        HTTP.IOHandler := SSL;
+        HTTP.Request.ContentType := 'application/json';
+        HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+
+        ListMessageJSON := TJSONObject.Create;
+        ListMessageJSON.AddPair('number', NumeroTelefone);
+        ListMessageJSON.AddPair('title', Titulo);
+        ListMessageJSON.AddPair('description', Descricao);
+        ListMessageJSON.AddPair('buttonText', TextoBotao);
+        ListMessageJSON.AddPair('footerText', TextoRodape);
+        ListMessageJSON.AddPair('sections', Secoes);
+        PostDataStream := TStringStream.Create(ListMessageJSON.ToString, TEncoding.UTF8);
+        try
+          Response := HTTP.Post(FEvolutionApiURL + '/message/sendList/' + FNomeInstancia, PostDataStream);
+          if HTTP.ResponseCode = 201 then
+            Result := True;
+        finally
+          PostDataStream.Free;
+        end;
+      finally
+        SSL.Free;
+        HTTP.Free;
+      end;
     end;
-  finally
-    SSL.Free;
-    HTTP.Free;
-  end;
+
 end;
 
 
