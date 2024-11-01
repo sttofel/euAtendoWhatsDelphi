@@ -181,7 +181,7 @@ end;
     function GetVersao: string;
   public
   function FazerLigacao(NumeroTelefone: String; Duracao: integer): String;
-   procedure EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao,
+   procedure EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao,thumburl,
       RodapeBotao: string; const Botoes: array of TButtonTipo);
    function CriarInstancia(out ErrorMsg: string): Boolean;
     property Version: TVersionOption read GetVersion write SetVersion;
@@ -1860,7 +1860,7 @@ begin
   Result := Contato;
 end;
 
-procedure TApiEuAtendo.EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao, RodapeBotao: string; const Botoes: array of TButtonTipo);
+procedure TApiEuAtendo.EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao,thumburl, RodapeBotao: string; const Botoes: array of TButtonTipo);
 var
   HTTP: TIdHTTP;
   SSL: TIdSSLIOHandlerSocketOpenSSL;
@@ -1884,6 +1884,7 @@ begin
       JSONToSend.AddPair('number', NumeroDestinatario);
       JSONToSend.AddPair('title', TituloBotao);
       JSONToSend.AddPair('description', DescricaoBotao);
+      JSONToSend.AddPair('thumbnailUrl', thumburl);
       JSONToSend.AddPair('footer', RodapeBotao);
 
       // Cria o array de botões
@@ -2271,7 +2272,6 @@ begin
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
-
         ListMessageJSON := TJSONObject.Create;
         ListMessageJSON.AddPair('number', NumeroTelefone);
         ListMessageJSON.AddPair('title', Titulo);
