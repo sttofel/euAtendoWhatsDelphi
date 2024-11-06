@@ -9,12 +9,6 @@
 - **Relatórios e Monitoramento**: Acompanhe estatísticas de uso e desempenho.
 - **Integração com CRM e Outras Plataformas**: Centralize o atendimento com integrações avançadas.
 
-## 🚀 Exemplo de Uso
-```delphi
-// Exemplo básico para enviar uma mensagem via WhatsApp
-ApiEuAtendo1.IniciarInstancia('NomeDaInstancia', 'ChaveApiOpcional');
-ApiEuAtendo1.EnviarMensagem('5561987654321', 'Olá, esta é uma mensagem de teste!');
-
 🛠 Pré-requisitos
 Delphi: Versão 10 ou superior.
 Internet: Conexão ativa para integração com as APIs do EuAtendo.
