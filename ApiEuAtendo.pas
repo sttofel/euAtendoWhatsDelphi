@@ -190,7 +190,7 @@ end;
     procedure obterDadosInstancia;
     function ObterMembrosGrupo(GroupJid: string; out ErroMsg: string): TGrupoMembros;
     procedure ObterContatos;
-    function ExistWhats(NumeroTelefone: string; out ErroMsg: string): Boolean;
+    function ExistWhats(Numeros: string; out ErroMsg: string): TJSONArray;
     function DeletarInstancia(nomeInstancia: string): Boolean;
     function DeslogarInstancia(): Boolean;
     function ReiniciarInstancia: Boolean;
@@ -1939,7 +1939,7 @@ begin
 end;
 
 
-function TApiEuAtendo.ExistWhats(NumeroTelefone: string; out ErroMsg: string): Boolean;
+function TApiEuAtendo.ExistWhats(Numeros: string; out ErroMsg: string): TJSONArray;
 var
   HTTP: TIdHTTP;
   SSL: TIdSSLIOHandlerSocketOpenSSL;
@@ -1948,23 +1948,32 @@ var
   PostDataStream: TStringStream;
   ResponseStr: string;
   ResponseJSONArray: TJSONArray;
-  ResponseItem: TJSONObject;
+  NumeroTelefone: string;
+  ListaNumeros: TArray<string>;
+  i: Integer;
 begin
-  Result := False;  // Assume failure by default
-  ErroMsg := '';    // Initialize error message
+  Result := nil; // Retorno inicial como nulo
+  ErroMsg := ''; // Inicializa a mensagem de erro
   HTTP := TIdHTTP.Create(nil);
   SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
   JSONToSend := TJSONObject.Create;
   NumbersArray := TJSONArray.Create;
-  ResponseJSONArray := nil;
   try
-    NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
+    // Divide a string de números usando vírgula como delimitador
+    ListaNumeros := Numeros.Split([',']);
+
+    // Adiciona cada número ao array JSON
+    for i := 0 to High(ListaNumeros) do
+    begin
+      NumeroTelefone := FormatPhoneNumber(ListaNumeros[i]);
+      NumbersArray.Add(NumeroTelefone);
+    end;
+
     SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
 
-    NumbersArray.Add(NumeroTelefone);
     JSONToSend.AddPair('numbers', NumbersArray);
 
     PostDataStream := TStringStream.Create(JSONToSend.ToString, TEncoding.UTF8);
@@ -1972,10 +1981,19 @@ begin
       try
         ResponseStr := HTTP.Post(FEvolutionApiURL + '/chat/whatsappNumbers/' + FNomeInstancia, PostDataStream);
         ResponseJSONArray := TJSONObject.ParseJSONValue(ResponseStr) as TJSONArray;
-        if Assigned(ResponseJSONArray) and (ResponseJSONArray.Count > 0) then
+
+        // Verifica se há uma resposta válida
+        if Assigned(ResponseJSONArray) then
         begin
-          ResponseItem := ResponseJSONArray.Items[0] as TJSONObject;
-          Result := ResponseItem.GetValue<Boolean>('exists');
+          Result := TJSONArray.Create;
+          for i := 0 to ResponseJSONArray.Count - 1 do
+          begin
+            Result.AddElement(ResponseJSONArray.Items[i].Clone as TJSONObject);
+          end;
+        end
+        else
+        begin
+          ErroMsg := 'Resposta inválida do servidor.';
         end;
       except
         on E: EIdHTTPProtocolException do
@@ -1993,13 +2011,12 @@ begin
     end;
   finally
     NumbersArray.Free;
-    //JSONToSend.Free;
-    if Assigned(ResponseJSONArray) then
-      ResponseJSONArray.Free;
+   // JSONToSend.Free;
     SSL.Free;
     HTTP.Free;
   end;
 end;
+
 
 function TApiEuAtendo.SendMessageGhostMentionToGroup(const GroupID, MessageText: string; out ErroMsg: string): Boolean;
 var
