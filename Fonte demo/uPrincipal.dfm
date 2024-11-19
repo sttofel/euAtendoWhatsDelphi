@@ -581,21 +581,21 @@ object Form9: TForm9
       Caption = 'Vers'#227'o da API'
     end
     object edtApiGlobal: TEdit
-      Left = 44
+      Left = 8
       Top = 96
-      Width = 173
+      Width = 249
       Height = 23
       TabOrder = 0
       Text = 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1'
       OnExit = edtApiGlobalExit
     end
     object edtUrl: TEdit
-      Left = 44
+      Left = 8
       Top = 146
-      Width = 173
+      Width = 249
       Height = 23
       TabOrder = 1
-      Text = 'https://apiv2demo.apidevs.app'
+      Text = 'https://apiv2demo.apicomponente.com.br'
       OnExit = edtUrlExit
     end
     object cbVersao: TComboBox
@@ -627,7 +627,7 @@ object Form9: TForm9
   end
   object Button19: TButton
     Left = 263
-    Top = 574
+    Top = 682
     Width = 282
     Height = 25
     Hint = 
@@ -641,7 +641,7 @@ object Form9: TForm9
   end
   object Button20: TButton
     Left = 263
-    Top = 624
+    Top = 713
     Width = 282
     Height = 25
     Caption = 'Alterar configuracao da instancia'
@@ -657,6 +657,75 @@ object Form9: TForm9
     TabOrder = 29
     Text = 'status'
     OnChange = edtStatusChange
+  end
+  object btEnviaLista: TButton
+    Left = 410
+    Top = 589
+    Width = 135
+    Height = 25
+    Caption = 'Enviar lista'
+    TabOrder = 30
+    OnClick = btEnviaListaClick
+  end
+  object btEnviaURL: TButton
+    Left = 263
+    Top = 527
+    Width = 135
+    Height = 25
+    Caption = 'botao URL'
+    TabOrder = 31
+    OnClick = btEnviaURLClick
+  end
+  object Button9: TButton
+    Left = 263
+    Top = 558
+    Width = 135
+    Height = 25
+    Caption = 'botao COPY'
+    TabOrder = 32
+    OnClick = Button9Click
+  end
+  object Button21: TButton
+    Left = 410
+    Top = 558
+    Width = 135
+    Height = 25
+    Caption = 'botao ligue de volta'
+    TabOrder = 33
+    OnClick = Button21Click
+  end
+  object Button22: TButton
+    Left = 263
+    Top = 589
+    Width = 135
+    Height = 25
+    Caption = 'botao Resposta'
+    TabOrder = 34
+    OnClick = Button22Click
+  end
+  object Button23: TButton
+    Left = 263
+    Top = 651
+    Width = 282
+    Height = 25
+    Caption = 'Envia os 3 botoes juntos'
+    TabOrder = 35
+    OnClick = Button23Click
+  end
+  object btFakeCall: TButton
+    Left = 263
+    Top = 620
+    Width = 282
+    Height = 25
+    Hint = 
+      'Aqui voce pode chamar aten'#231#227'o do seu cliente, um lembrete de ate' +
+      'ndimento por exemplo, ap'#243's enviar a mensgaem voce faz uma chamad' +
+      'a de 5 segundos para refor'#231'ar a visualiza'#231#227'o.'
+    Caption = 'Fazer liga'#231#227'o '#39'Uma chamada fake por x segundos'#39
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 36
+    OnClick = btFakeCallClick
   end
   object ApiEuAtendo1: TApiEuAtendo
     VersionAPI = V2

@@ -66,6 +66,13 @@ type
     edtQtdContatos: TEdit;
     cbVersao: TComboBox;
     Label13: TLabel;
+    btEnviaLista: TButton;
+    btEnviaURL: TButton;
+    Button9: TButton;
+    Button21: TButton;
+    Button22: TButton;
+    Button23: TButton;
+    btFakeCall: TButton;
  procedure Button1Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure voceAtendeAPIObterQrCode(Sender: TObject;
@@ -94,7 +101,7 @@ type
     procedure edtSenhaExit(Sender: TObject);
     procedure edtApiGlobalExit(Sender: TObject);
     procedure edtUrlExit(Sender: TObject);
-    procedure Button9Click(Sender: TObject);
+    procedure btEnviaListaClick(Sender: TObject);
     procedure Button10Click(Sender: TObject);
     procedure Button11Click(Sender: TObject);
     procedure Button12Click(Sender: TObject);
@@ -111,6 +118,12 @@ type
     procedure Button19Click(Sender: TObject);
     procedure Button20Click(Sender: TObject);
     procedure cbVersaoChange(Sender: TObject);
+    procedure btEnviaURLClick(Sender: TObject);
+    procedure Button21Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
+    procedure Button22Click(Sender: TObject);
+    procedure Button23Click(Sender: TObject);
+    procedure btFakeCallClick(Sender: TObject);
   private
     procedure LoadBase64ToImage(const Base64: string; Image: TImage);
     function SaveImageFromURLToDisk(const ImageURL,
@@ -290,25 +303,50 @@ end;
 
 procedure TForm9.Button13Click(Sender: TObject);
 var
-  Numero, ErroMsg: string;
-  Existe: Boolean;
+  Numeros, ErroMsg: string;
+  ResponseArray: TJSONArray;
+  ResponseItem: TJSONObject;
+  i: Integer;
 begin
-  Numero := edtNumeroContato.Text; // Assume que edtNumero é um TEdit onde o número é inserido
+  Numeros := edtNumeroContato.Text; // Assume que edtNumero é um TEdit onde os números são inseridos separados por vírgula
   try
-    Existe := ApiEuAtendo1.ExistWhats(Numero, ErroMsg);
-    if Existe then
-      memo1.Lines.add('O número ' + Numero + ' existe no WhatsApp.')
+    ResponseArray := ApiEuAtendo1.ExistWhats(Numeros, ErroMsg);
+
+    if Assigned(ResponseArray) then
+    begin
+      // Itera sobre o array de respostas para cada número
+      for i := 0 to ResponseArray.Count - 1 do
+      begin
+        ResponseItem := ResponseArray.Items[i] as TJSONObject;
+        memo1.Lines.Add('Número: ' + ResponseItem.GetValue<string>('number'));
+        memo1.Lines.Add('JID: ' + ResponseItem.GetValue<string>('jid'));
+        memo1.Lines.Add('Existe no WhatsApp: ' + BoolToStr(ResponseItem.GetValue<Boolean>('exists'), True));
+
+        // Verifica se o campo 'name' existe antes de tentar acessá-lo
+        if ResponseItem.TryGetValue<string>('name', ErroMsg) then
+          memo1.Lines.Add('Nome: ' + ErroMsg)
+        else
+          memo1.Lines.Add('Nome: Não disponível');
+
+        memo1.Lines.Add(''); // Linha em branco para separação visual entre os números
+      end;
+    end
     else if ErroMsg <> '' then
-      memo1.Lines.add('Erro ao verificar o número: ' + ErroMsg)
+    begin
+      memo1.Lines.Add('Erro ao verificar os números: ' + ErroMsg);
+    end
     else
-      memo1.Lines.add('O número ' + Numero + ' não existe no WhatsApp.');
+    begin
+      memo1.Lines.Add('Nenhum número existe no WhatsApp.');
+    end;
   except
     on E: Exception do
     begin
-      memo1.Lines.add('Erro ao verificar o número: ' + ErroMsg);
+      memo1.Lines.Add('Erro ao verificar os números: ' + E.Message);
     end;
   end;
 end;
+
 
 procedure TForm9.Button14Click(Sender: TObject);
 var
@@ -496,6 +534,49 @@ begin
 ApiEuAtendo1.AlterarPropriedadesInstancia(true,true,true,true,true,'esse numero desativou as ligações',erro);
 end;
 
+procedure TForm9.Button21Click(Sender: TObject);
+var
+  Botao: TButtonTipo;
+begin
+  // Preencher os dados do botão do tipo URL
+  Botao.Tipo := 'call';
+  Botao.Texto := 'Clique aqui para ligar para o suporte';
+  Botao.PhoneNumber := '+559982385000';
+  // Envia o botão usando o método EnviarBota
+  ApiEuAtendo1.EnviarBotao(edtNumeroContato.Text, 'Apidevs informa', 'Segue link da sua fatura em aberto.','https://s33.apidevs.app/euatendo/10.png', 'Agradeçemos a preferencia', Botao);
+end;
+
+procedure TForm9.Button22Click(Sender: TObject);
+var
+  Botao: TButtonTipo;
+begin
+  // Preencher os dados do botão do tipo URL
+  Botao.Tipo := 'reply';
+  Botao.Texto := 'Aceita a trasacao?';
+  Botao.Codigo := '1593';
+  // Envia o botão usando o método EnviarBota
+  ApiEuAtendo1.EnviarBotao(edtNumeroContato.Text, 'Apidevs informa', 'Segue link da sua fatura em aberto.','https://s33.apidevs.app/euatendo/10.png', 'Agradeçemos a preferencia', Botao);
+end;
+
+procedure TForm9.Button23Click(Sender: TObject);
+var
+  Botao1, Botao2, Botao3: TButtonTipo;
+begin
+    Botao1.Tipo := 'reply';
+    Botao1.Texto := 'Obrigado';
+    Botao1.Id := '123';
+
+    Botao2.Tipo := 'copy';
+    Botao2.Texto := 'Copir link';
+    Botao2.Codigo := 'https://doc.apicomponente.com.br';
+
+    Botao3.Tipo := 'url';
+    Botao3.Texto := 'acessar documentação';
+    Botao3.Url := 'https://doc.apicomponente.com.br';
+
+    ApiEuAtendo1.EnviarBotao(edtNumeroContato.Text, 'Título', 'Descrição','https://s33.apidevs.app/euatendo/10.png', 'Rodapé', [Botao1, Botao2, Botao3]);
+end;
+
 procedure TForm9.Button2Click(Sender: TObject);
 begin
 ApiEuAtendo1.ObterQrCode;
@@ -542,6 +623,18 @@ ApiEuAtendo1.obterInstancias;
 end;
 
 procedure TForm9.Button9Click(Sender: TObject);
+var
+  Botao: TButtonTipo;
+begin
+  // Preencher os dados do botão do tipo URL
+  Botao.Tipo := 'copy';
+  Botao.Texto := 'Clique aqui para copiar seu PIX';
+  Botao.Codigo := '15932154121651';
+  // Envia o botão usando o método EnviarBota
+  ApiEuAtendo1.EnviarBotao(edtNumeroContato.Text, 'Apidevs informa', 'Segue link da sua fatura em aberto.','https://s33.apidevs.app/euatendo/10.png', 'Agradeçemos a preferencia', Botao);
+end;
+
+procedure TForm9.btEnviaListaClick(Sender: TObject);
 var
 Secoes: TJSONArray;
 Secao, Linha: TJSONObject;
@@ -607,13 +700,32 @@ try
   end;
 end;
 
+procedure TForm9.btEnviaURLClick(Sender: TObject);
+var
+  Botao: TButtonTipo;
+begin
+  // Preencher os dados do botão do tipo URL
+  Botao.Tipo := 'url';
+  Botao.Texto := 'Clique aqui para acessar sua fatura';
+  Botao.Url := 'https://fatura.clientbase.com.br/de056ae8-16cd-4c45-a103-a6bfe2023850';
+  // Envia o botão usando o método EnviarBota
+  ApiEuAtendo1.EnviarBotao(edtNumeroContato.Text, 'Apidevs informa', 'Segue link da sua fatura em aberto.','https://s33.apidevs.app/euatendo/10.png', 'Agradeçemos a preferencia', Botao);
+
+end;
+
+
+procedure TForm9.btFakeCallClick(Sender: TObject);
+begin
+edtIDMensagem.Text := ApiEuAtendo1.FazerLigacao(edtNumeroContato.text,5);
+end;
+
 procedure TForm9.cbVersaoChange(Sender: TObject);
 begin
  if cbVersao.ItemIndex = 0 then
    begin
    ApiEuAtendo1.VersionAPI := TVersionOption.V1;
    edtApiGlobal.Text := 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1';
-   edtUrl.Text := 'https://apiv1demo.apidevs.app';
+   edtUrl.Text := 'https://apiv1demo.apicomponente.com.br';
 
    ApiEuAtendo1.EvolutionApiURL := edtUrl.text;
    ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
@@ -622,7 +734,7 @@ begin
    else
    begin
    edtApiGlobal.Text := 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1';
-   edtUrl.Text := 'https://apiv2demo.apidevs.app';
+   edtUrl.Text := 'https://apiv2demo.apicomponente.com.br';
    ApiEuAtendo1.VersionAPI := TVersionOption.V2 ;
    ApiEuAtendo1.EvolutionApiURL := edtUrl.text;
    ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
