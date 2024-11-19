@@ -9,6 +9,8 @@
 - **Relatórios e Monitoramento**: Acompanhe estatísticas de uso e desempenho.
 - **Integração com CRM e Outras Plataformas**: Centralize o atendimento com integrações avançadas.
 
+Contribuição do novo Layout do demo
+[https://github.com/evertonbuenolimaqueiroz](https://github.com/evertonbuenolimaqueiroz)
 🛠 Pré-requisitos
 Delphi: Versão 10 ou superior.
 Internet: Conexão ativa para integração com as APIs do EuAtendo.
