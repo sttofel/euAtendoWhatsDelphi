@@ -114,7 +114,7 @@ end;
     DisconnectionReasonCode: string;
     DisconnectionObject: string;
     Settings: TInstanceSettings;       // Configurações da instância (aninhado)
-  Count: TInstanceCount;             // Contador da instância (aninhado)
+    Count: TInstanceCount;             // Contador da instância (aninhado)
   end;
   TInstances = array of TInstanceDetail;
 
@@ -806,8 +806,7 @@ begin
   DDD := FdddPadrao;  // DDD padrão
   CountryCodeLength := Length(FCodigoPais);
   DDDLength := Length(FdddPadrao);
-  if FVersion = TVersionOption.V2 then begin if Pos(TNetEncoding.Base64.Decode('YXBpY29tcG9uZW50ZS5jb20uYnI='), FEvolutionApiURL) = 0 then
-  begin raise Exception.Create('Resposta JSON inválida');end; end;
+
 
   // Manter apenas os dígitos numéricos
   for I := 1 to Length(Numero) do
@@ -1009,9 +1008,7 @@ function TApiEuAtendo.DetectFileType(const filePath: string): string;
 var
   fileExt: string;
 begin
-  if FVersion = TVersionOption.V2 then begin if Pos(TNetEncoding.Base64.Decode('YXBpY29tcG9uZW50ZS5jb20uYnI='), FEvolutionApiURL) = 0 then
-  begin raise Exception.Create('Resposta JSON inválida');end; end;
-
+ 
   // Extrai a extensão do arquivo a partir do caminho do arquivo
   fileExt := LowerCase(ExtractFileExt(filePath));
 
@@ -1186,9 +1183,7 @@ begin
     MimeTypes.Add('.avi', 'video/x-msvideo');
     MimeTypes.Add('.mov', 'video/quicktime');
     MimeTypes.Add('.json', 'application/json');
-    if FVersion = TVersionOption.V2 then begin if Pos(TNetEncoding.Base64.Decode('YXBpY29tcG9uZW50ZS5jb20uYnI='), FEvolutionApiURL) = 0 then
-    begin raise Exception.Create('Resposta JSON inválida');end; end;
-
+   
     // Extrai a extensão do nome do arquivo
     Extension := ExtractFileExt(FileName).ToLower;
     // Converte a extensão para minúsculas e garante que ela comece com ponto
@@ -1332,9 +1327,7 @@ begin
   if not FileExists(FileName) then
     Exit;
 
-  if FVersion = TVersionOption.V2 then begin if Pos(TNetEncoding.Base64.Decode('YXBpY29tcG9uZW50ZS5jb20uYnI='), FEvolutionApiURL) = 0 then
-  begin raise Exception.Create('Resposta JSON inválida');end; end;
-
+ 
   InputStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
   try
     SetLength(Bytes, InputStream.Size);
@@ -1361,6 +1354,8 @@ begin
   HTTP := TIdHTTP.Create(nil);
   SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
   try
+
+    NumeroContato := FormatPhoneNumber(NumeroContato);
     SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
