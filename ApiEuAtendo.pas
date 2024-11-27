@@ -387,6 +387,11 @@ begin
           begin
             if (Value <> nil) and not Value.Null then
               Contatos[I].fone := Value.Value;
+          end
+          else if JSONContato.TryGetValue('id', Value) then
+          begin
+            if (Value <> nil) and not Value.Null then
+              Contatos[I].fone := Value.Value;
           end;
 
           // Limpa o sufixo do número de telefone, se necessário
