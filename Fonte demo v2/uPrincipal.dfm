@@ -138,7 +138,7 @@ object Form9: TForm9
     Top = 102
     Width = 612
     Height = 267
-    ActivePage = TabSheet3
+    ActivePage = TabSheet2
     TabOrder = 6
     object TabSheet7: TTabSheet
       Caption = 'Configuracoes'
@@ -389,7 +389,6 @@ object Form9: TForm9
         Top = 40
         Width = 278
         Height = 23
-        ReadOnly = True
         TabOrder = 6
       end
       object memoMensagemEnviar: TMemo
@@ -592,7 +591,7 @@ object Form9: TForm9
     OnObterGrupos = ApiEuAtendo1ObterGrupos
     OnObterFotoPerfil = ApiEuAtendo1ObterFotoPerfil
     GlobalAPI = 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1'
-    EvolutionApiURL = 'https://apinscv1.apidevs.app'
+    EvolutionApiURL = 'https://apiv1demo.apicomponente.com.br'
     OnStatusInstancia = ApiEuAtendo1StatusInstancia
     OnCriarInstancia = ApiEuAtendo1CriarInstancia
     OnObterQrCode = ApiEuAtendo1ObterQrCode
