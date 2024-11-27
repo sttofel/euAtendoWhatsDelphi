@@ -295,16 +295,16 @@ begin
     if ApiEuAtendo1.Version = TVersionOption.V1 then
     begin
       ClientDataSet1.FieldByName('Owner').AsString := Instancias[I].Owner;
-      ClientDataSet1.FieldByName('PhoneNumber').AsString := '';
+      ClientDataSet1.FieldByName('PhoneNumber').AsString := Instancias[I].PhoneNumber;
       // Não existe no V1
     end
     else if ApiEuAtendo1.Version = TVersionOption.V2 then
     begin
       ClientDataSet1.FieldByName('Owner').AsString       := Instancias[I].Owner;
       ClientDataSet1.FieldByName('PhoneNumber').AsString :=Instancias[I].PhoneNumber;
-      ClientDataSet1.FieldByName('Contatos').AsString  :=Instancias[I].Count.ContactCount.ToString;
-      ClientDataSet1.FieldByName('mensagens').AsString :=Instancias[I].Count.MessageCount.ToString;
-      ClientDataSet1.FieldByName('Conversas').AsString :=Instancias[I].Count.ChatCount.ToString;
+      ClientDataSet1.FieldByName('Contatos').AsString    :=Instancias[I].Count.ContactCount.ToString;
+      ClientDataSet1.FieldByName('mensagens').AsString   :=Instancias[I].Count.MessageCount.ToString;
+      ClientDataSet1.FieldByName('Conversas').AsString   :=Instancias[I].Count.ChatCount.ToString;
     end;
 
     ClientDataSet1.Post;

@@ -585,7 +585,6 @@ object Form9: TForm9
     end
   end
   object ApiEuAtendo1: TApiEuAtendo
-    VersionAPI = V2
     OnObterInstancias = ApiEuAtendo1ObterInstancias
     OnObterContatos = ApiEuAtendo1ObterContatos
     CodigoPais = '55'
@@ -593,7 +592,7 @@ object Form9: TForm9
     OnObterGrupos = ApiEuAtendo1ObterGrupos
     OnObterFotoPerfil = ApiEuAtendo1ObterFotoPerfil
     GlobalAPI = 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1'
-    EvolutionApiURL = 'https://apiv2demo.apidevs.app'
+    EvolutionApiURL = 'https://apinscv1.apidevs.app'
     OnStatusInstancia = ApiEuAtendo1StatusInstancia
     OnCriarInstancia = ApiEuAtendo1CriarInstancia
     OnObterQrCode = ApiEuAtendo1ObterQrCode

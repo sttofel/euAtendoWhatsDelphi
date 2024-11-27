@@ -518,6 +518,13 @@ begin
           Instances[I].PhoneNumber := Copy(OwnerJid, 1, Pos('@', OwnerJid) - 1);
         end;
 
+         if JSONInstance.TryGetValue('owner', Value) and not (Value is TJSONNull) then
+        begin
+          OwnerJid := Value.Value;
+          // Remover o sufixo '@s.whatsapp.net'
+          Instances[I].PhoneNumber := Copy(OwnerJid, 1, Pos('@', OwnerJid) - 1);
+        end;
+
       if JSONInstance.TryGetValue('apikey', Value) then
         Instances[I].ApiKey := Value.Value
       else if JSONInstance.TryGetValue('token', Value) then
