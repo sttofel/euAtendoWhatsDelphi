@@ -185,7 +185,7 @@ object Form9: TForm9
         Width = 249
         Height = 23
         TabOrder = 0
-        Text = 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1'
+        Text = '731c573a3b28f00380b9e4306599bf73'
         OnExit = edtApiGlobalExit
       end
       object edtUrl: TEdit
@@ -194,7 +194,7 @@ object Form9: TForm9
         Width = 249
         Height = 23
         TabOrder = 1
-        Text = 'https://apiv2demo.apicomponente.com.br'
+        Text = 'https://demo2.apieuatendo.com.br'
         OnExit = edtUrlExit
       end
       object cbVersao: TComboBox
