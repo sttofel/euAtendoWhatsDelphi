@@ -301,10 +301,10 @@ begin
     else if ApiEuAtendo1.Version = TVersionOption.V2 then
     begin
       ClientDataSet1.FieldByName('Owner').AsString       := Instancias[I].Owner;
-      ClientDataSet1.FieldByName('PhoneNumber').AsString :=Instancias[I].PhoneNumber;
-      ClientDataSet1.FieldByName('Contatos').AsString    :=Instancias[I].Count.ContactCount.ToString;
-      ClientDataSet1.FieldByName('mensagens').AsString   :=Instancias[I].Count.MessageCount.ToString;
-      ClientDataSet1.FieldByName('Conversas').AsString   :=Instancias[I].Count.ChatCount.ToString;
+      ClientDataSet1.FieldByName('PhoneNumber').AsString := Instancias[I].PhoneNumber;
+      ClientDataSet1.FieldByName('Contatos').AsString    := Instancias[I].Count.ContactCount.ToString;
+      ClientDataSet1.FieldByName('mensagens').AsString   := Instancias[I].Count.MessageCount.ToString;
+      ClientDataSet1.FieldByName('Conversas').AsString   := Instancias[I].Count.ChatCount.ToString;
     end;
 
     ClientDataSet1.Post;
@@ -743,23 +743,24 @@ end;
 
 procedure TForm9.cbVersaoChange(Sender: TObject);
 begin
-  if cbVersao.ItemIndex = 0 then
-  begin
-    ApiEuAtendo1.VersionAPI := TVersionOption.V1;
-    edtApiGlobal.Text := 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1';
-    edtUrl.Text := 'https://apiv1demo.apicomponente.com.br';
+if cbVersao.ItemIndex = 0 then
+   begin
+   ApiEuAtendo1.VersionAPI := TVersionOption.V1;
+   edtApiGlobal.Text := '9bb2b5203266a594dfbe41597c7ff0f2';
+   edtUrl.Text := 'https://demo1.apieuatendo.com.br';
 
-    ApiEuAtendo1.EvolutionApiURL := edtUrl.Text;
-    ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
-  end
-  else
-  begin
-    edtApiGlobal.Text := 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1';
-    edtUrl.Text := 'https://apiv2demo.apicomponente.com.br';
-    ApiEuAtendo1.VersionAPI := TVersionOption.V2;
-    ApiEuAtendo1.EvolutionApiURL := edtUrl.Text;
-    ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
-  end;
+   ApiEuAtendo1.EvolutionApiURL := edtUrl.text;
+   ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
+
+   end
+   else
+   begin
+   edtApiGlobal.Text := '731c573a3b28f00380b9e4306599bf73';
+   edtUrl.Text := 'https://demo2.apieuatendo.com.br';
+   ApiEuAtendo1.VersionAPI := TVersionOption.V2 ;
+   ApiEuAtendo1.EvolutionApiURL := edtUrl.text;
+   ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
+   end;
 end;
 
 procedure TForm9.edtApiGlobalExit(Sender: TObject);

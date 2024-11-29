@@ -138,7 +138,7 @@ object Form9: TForm9
     Top = 102
     Width = 612
     Height = 267
-    ActivePage = TabSheet2
+    ActivePage = TabSheet7
     TabOrder = 6
     object TabSheet7: TTabSheet
       Caption = 'Configuracoes'
@@ -458,7 +458,7 @@ object Form9: TForm9
         WordWrap = True
       end
       object Button7: TButton
-        Left = 3
+        Left = 10
         Top = 23
         Width = 282
         Height = 25

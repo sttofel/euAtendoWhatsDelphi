@@ -260,6 +260,9 @@ begin
             memo1.Lines.Add('Instancia ' + Instancias[i].InstanceName);
             memo1.Lines.Add('Chave ' + Instancias[i].ApiKey);
             memo1.Lines.Add('Numero ' + Instancias[i].PhoneNumber);
+            memo1.Lines.Add('QtdContatos ' + Instancias[i].Count.ContactCount.ToString);
+            memo1.Lines.Add('Mensagens ' + Instancias[i].Count.MessageCount.ToString);
+            memo1.Lines.Add('Conversas ' + Instancias[i].Count.ChatCount.ToString);
             memo1.Lines.Add('---------------------------------------- ' + Instancias[i].Owner);
        end;
 
@@ -724,8 +727,8 @@ begin
  if cbVersao.ItemIndex = 0 then
    begin
    ApiEuAtendo1.VersionAPI := TVersionOption.V1;
-   edtApiGlobal.Text := 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1';
-   edtUrl.Text := 'https://apiv1demo.apicomponente.com.br';
+   edtApiGlobal.Text := '9bb2b5203266a594dfbe41597c7ff0f2';
+   edtUrl.Text := 'https://demo1.apieuatendo.com.br';
 
    ApiEuAtendo1.EvolutionApiURL := edtUrl.text;
    ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
@@ -733,8 +736,8 @@ begin
    end
    else
    begin
-   edtApiGlobal.Text := 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1';
-   edtUrl.Text := 'https://apiv2demo.apicomponente.com.br';
+   edtApiGlobal.Text := '731c573a3b28f00380b9e4306599bf73';
+   edtUrl.Text := 'https://demo2.apieuatendo.com.br';
    ApiEuAtendo1.VersionAPI := TVersionOption.V2 ;
    ApiEuAtendo1.EvolutionApiURL := edtUrl.text;
    ApiEuAtendo1.GlobalAPI := edtApiGlobal.Text;
