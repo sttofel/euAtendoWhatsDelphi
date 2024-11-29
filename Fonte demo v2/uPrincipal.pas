@@ -633,8 +633,7 @@ end;
 
 procedure TForm9.Button3Click(Sender: TObject);
 begin
-  edtIDMensagem.Text := ApiEuAtendo1.EnviarMensagemDeTexto
-    (edtNumeroContato.Text, memoMensagemEnviar.Lines.Text);
+  edtIDMensagem.Text := ApiEuAtendo1.EnviarMensagemDeTexto(edtNumeroContato.Text, memoMensagemEnviar.Lines.Text);
 end;
 
 procedure TForm9.Button4Click(Sender: TObject);

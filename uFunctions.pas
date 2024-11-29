@@ -6,6 +6,7 @@ uses
   System.JSON, System.SysUtils, System.Variants, System.DateUtils;
 
 function VariantToJSON(Value: Variant): TJSONValue;
+function LimpaTelefone(Const Numero: string): string;
 
 // https://stackoverflow.com/questions/76463926/delphi-11-3-unable-to-create-add-jsons-from-variant
 
@@ -53,6 +54,22 @@ begin
     end;
     Result := JSONArray;
   end;
+end;
+
+function LimpaTelefone(const Numero: string): string;
+var
+   x: integer;
+   st: string;
+begin
+  st:='';
+  for x:=1 to length(Numero) do
+  begin
+    if (Numero[x] <> '(') and
+       (Numero[x] <> ')') and
+       (Numero[x] <> '-') then
+      st:=st + Numero[x];
+  end;
+  Result:=Trim(st);
 end;
 
 end.

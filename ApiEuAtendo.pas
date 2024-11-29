@@ -24,6 +24,7 @@ type
   TInstanceStatus = record
     InstanceName: string;
     State: string;
+    StateMessage: string;
   end;
 
   TButtonTipo = record
@@ -206,6 +207,7 @@ end;
 
     function StatusInstancia( ): TInstanceStatus;
     procedure ObterQrCode();
+    function ObterQrCode64: string;
     function EnviarMensagemDeTexto(NumeroTelefone, Mensagem: string): string;
     function StatusDaMensagem(idMensagem,NumeroContato: string): string;
     function EnviarLista(NumeroTelefone, Titulo, Descricao, TextoBotao, TextoRodape: string; Secoes: TJSONArray): Boolean;
@@ -280,7 +282,7 @@ end;
 function TApiEuAtendo.ObterMembrosGrupo(GroupJid: string; out ErroMsg: string): TGrupoMembros;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
   ResponseJSON: TJSONObject;
   ParticipantsJSON: TJSONArray;
@@ -291,9 +293,8 @@ begin
   SetLength(Membros, 0);  // Initialize as empty
   ErroMsg := '';  // Initialize error message
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
     try
@@ -335,7 +336,7 @@ end;
 procedure TApiEuAtendo.ObterContatos;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend: TJSONObject;
   PostDataStream: TStringStream;
   ResponseStr: string;
@@ -346,9 +347,8 @@ var
   I: Integer;
 begin
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -615,17 +615,16 @@ end;
 procedure TApiEuAtendo.CarregarImagemDaUrl(const AURL: string; AImage: TImage);
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ImageStream: TMemoryStream;
   JpegImage: TJPEGImage;
 begin
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   ImageStream := TMemoryStream.Create;
   JpegImage := TJPEGImage.Create;
   try
     try
-      SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
       HTTP.IOHandler := SSL;
       // Fazendo o download da imagem
       HTTP.Get(AURL, ImageStream);
@@ -650,7 +649,7 @@ end;
 procedure TApiEuAtendo.obterDadosInstancia;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
   JSONResponse, JSONInstance, IntegrationJSON: TJSONObject;
   Instances: TInstances;
@@ -658,9 +657,9 @@ var
   Value: TJSONValue;
 begin
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
     // Ajuste na URL com o parâmetro instanceName
@@ -715,7 +714,7 @@ begin
 t.CreateAnonymousThread(procedure
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
   ResponseJSON: TJSONObject;
   Grupos: TGrupos;
@@ -725,9 +724,9 @@ var
   I: Integer;
  begin
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
 
@@ -808,71 +807,23 @@ begin
 end;
 
 function TApiEuAtendo.FormatPhoneNumber(const Numero: string): string;
-var
-  I: Integer;
-  FormattedNumber, DDD, NumeroFinal: string;
-  CountryCodeLength, DDDLength, NumeroLength: Integer;
+var LDDD, LDDI, LNumero: string;
 begin
-  FormattedNumber := '';
-  DDD := FdddPadrao;  // DDD padrão
-  CountryCodeLength := Length(FCodigoPais);
-  DDDLength := Length(FdddPadrao);
+  LNumero:= LimpaTelefone(Numero);
+  LDDD:= Self.DDDPadrao;
+  LDDI:= Self.CodigoPais;
+
+  if not StrToIntDef(Numero, 0) = 0 then raise Exception.Create('Não pode ter letras no telefone!');
 
 
-  // Manter apenas os dígitos numéricos
-  for I := 1 to Length(Numero) do
-  begin
-    if CharInSet(Numero[I], ['0'..'9']) then
-      FormattedNumber := FormattedNumber + Numero[I];
-  end;
-  NumeroLength := Length(FormattedNumber);
-  // Extração de partes do número baseado no comprimento
-  case NumeroLength of
-    8:
-      NumeroFinal := FormattedNumber; // Somente o número
-    9:
-      begin
-        if StrToIntDef(DDD, 0) <= 35 then
-          NumeroFinal := FormattedNumber // nono dígito + número
-        else
-          NumeroFinal := Copy(FormattedNumber, 2, 8); // Removendo o nono dígito
-      end;
-    10:
-      begin
-        // DDD + número
-        DDD := Copy(FormattedNumber, 1, 2);
-        if StrToIntDef(DDD, 0) >= 35 then
-          NumeroFinal := Copy(FormattedNumber, 3, 8)
-        else
-          NumeroFinal := '9' + Copy(FormattedNumber, 3, 8); // Adicionando nono dígito
-      end;
-    11:
-      begin
-        // DDD + nono dígito + número
-        DDD := Copy(FormattedNumber, 1, 2);
-        NumeroFinal := Copy(FormattedNumber, 3, 9);
-      end;
-    12:
-      begin
-        // Código do país + DDD + número
-        DDD := Copy(FormattedNumber, 3, 2);
-        if StrToIntDef(DDD, 0) >= 35 then
-          NumeroFinal := Copy(FormattedNumber, 5, 8)
-        else
-          NumeroFinal := '9' + Copy(FormattedNumber, 5, 8); // Adicionando nono dígito
-      end;
-    13:
-      begin
-        // Código do país + DDD + nono dígito + número
-        DDD := Copy(FormattedNumber, 3, 2);
-        NumeroFinal := Copy(FormattedNumber, 5, 9);
-      end;
-  end;
-  // Montar o número final
-  if NumeroFinal <> '' then
-    Result := FCodigoPais + DDD + NumeroFinal
-  else
-    Result := FormattedNumber;
+  if (Length(LNumero) < 8) then raise Exception.Create('Invalid number');
+
+
+  if (Length(LNumero) = 8) or (Length(LNumero) = 9) then
+    Result:= LDDI + LDDD + LNumero
+  else if (Length(LNumero) = 10) or (Length(LNumero) = 11) then
+    Result:= LDDI + LNumero
+  else if (Length(LNumero) >= 12) then Result:= LNumero;
 end;
 
 function TApiEuAtendo.SaveImageFromURLToDisk(const ImageURL, NumeroContato: string): string;
@@ -923,7 +874,7 @@ begin
     procedure
     var
       HTTP: TIdHTTP;
-      SSL: TIdSSLIOHandlerSocketOpenSSL;
+      SSL: TIdSSLIOHandlerSocketSChannel;
       JSONToSend, ResponseJSON: TJSONObject;
       ResponseStr, FilePath: string;
       PostDataStream: TStringStream;
@@ -932,8 +883,8 @@ begin
       try
         Numero := FormatPhoneNumber(Numero);
         HTTP := TIdHTTP.Create(nil);
-        SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+        SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1053,7 +1004,7 @@ end;
 function TApiEuAtendo.EnviarMensagemDeBase64(NumeroTelefone, MediaCaption, base64,tipoArquivo,nomeArquivo: string): string;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend: TJSONObject;
   OptionsJSON, MediaMessageJSON: TJSONObject;
   PostDataStream: TStringStream;
@@ -1067,11 +1018,11 @@ begin
      Result := '';  // Assume failure by default
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       Base64Str := CleanInvalidBase64Chars(base64);
       FileName := nomeArquivo;
       try
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1118,11 +1069,11 @@ begin
       Result := '';  // Assume failure by default
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       Base64Str := CleanInvalidBase64Chars(base64);
       FileName := nomeArquivo;
       try
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1215,7 +1166,7 @@ end;
 function TApiEuAtendo.EnviarMensagemDeMidia(NumeroTelefone, Mensagem, MediaCaption, caminho_arquivo: string): string;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend: TJSONObject;
   OptionsJSON, MediaMessageJSON: TJSONObject;
   PostDataStream: TStringStream;
@@ -1229,12 +1180,12 @@ begin
       Result := '';  // Assume failure by default
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       TipoArquivo := DetectFileType(caminho_arquivo);
       Base64Str := FileToBase64(caminho_arquivo);
       FileName := ExtractFileName(caminho_arquivo);
       try
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1282,13 +1233,13 @@ begin
       Result := '';  // Assume failure by default
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       TipoArquivo := DetectFileType(caminho_arquivo);
       Base64Str := FileToBase64(caminho_arquivo);
       FileName := ExtractFileName(caminho_arquivo);
 
       try
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1354,7 +1305,7 @@ end;
 function TApiEuAtendo.StatusDaMensagem(idMensagem, NumeroContato: string): string;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend, WhereJSON: TJSONObject;
   PostDataStream: TStringStream;
   Response: string;
@@ -1363,11 +1314,11 @@ var
 begin
   Result := '';  // Assume failure by default
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
 
     NumeroContato := FormatPhoneNumber(NumeroContato);
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1409,7 +1360,7 @@ end;
 function TApiEuAtendo.EnviarMensagemDeTexto(NumeroTelefone, Mensagem: string): string;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend: TJSONObject;
   TextMessageJSON, OptionsJSON: TJSONObject;
   PostDataStream: TStringStream;
@@ -1421,10 +1372,9 @@ begin
     begin
      Result := '';  // Assume failure by default
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       try
-         SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1464,12 +1414,11 @@ begin
 
     if FVersion = TVersionOption.V2 then
     begin
-     Result := '';  // Assume failure by default
+      Result := '';  // Assume failure by default
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       try
-         SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1512,7 +1461,7 @@ end;
 function TApiEuAtendo.FazerLigacao(NumeroTelefone: String; Duracao: integer): String;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend: TJSONObject;
   TextMessageJSON, OptionsJSON: TJSONObject;
   PostDataStream: TStringStream;
@@ -1523,10 +1472,10 @@ begin
     begin
      Result := '';  // Assume failure by default
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       try
-         SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1695,7 +1644,7 @@ end;
 function TApiEuAtendo.AlterarPropriedadesInstancia(rejeitarLigacao,ignorarGrupos,sempreOnline,lerMensagens,lerStatus : Boolean;mensagemRejeitaLigacao:String; out ErrorMsg: string): Boolean;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend, ResponseJSON, InstanceJSON, HashJSON, ProxyJSON: TJSONObject;
   JSONString: string;
   ResponseStr: string;
@@ -1705,25 +1654,38 @@ begin
   Result := False;
   ErrorMsg := '';
 
-   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  HTTP := TIdHTTP.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   JSONToSend := TJSONObject.Create;
   ProxyJSON := TJSONObject.Create;
   ResponseJSON := nil;
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
 
-    JSONToSend.AddPair('reject_call', VariantToJSON(rejeitarLigacao));
-    JSONToSend.AddPair('groups_ignore', VariantToJSON(ignorarGrupos));
-    JSONToSend.AddPair('always_online', VariantToJSON(sempreOnline));
-    JSONToSend.AddPair('read_messages', VariantToJSON(lerMensagens));
-    JSONToSend.AddPair('read_status', VariantToJSON(lerStatus));
-    JSONToSend.AddPair('sync_full_history', VariantToJSON(false));
-    JSONToSend.AddPair('msg_call', mensagemRejeitaLigacao);
+    if FVersion = TVersionOption.V1 then
+    begin
+      JSONToSend.AddPair('reject_call', VariantToJSON(rejeitarLigacao));
+      JSONToSend.AddPair('groups_ignore', VariantToJSON(ignorarGrupos));
+      JSONToSend.AddPair('always_online', VariantToJSON(sempreOnline));
+      JSONToSend.AddPair('read_messages', VariantToJSON(lerMensagens));
+      JSONToSend.AddPair('read_status', VariantToJSON(lerStatus));
+      JSONToSend.AddPair('sync_full_history', VariantToJSON(false));
+      JSONToSend.AddPair('msg_call', mensagemRejeitaLigacao);
+    end;
 
+
+    if FVersion = TVersionOption.V2 then
+    begin
+      JSONToSend.AddPair('rejectCall', VariantToJSON(rejeitarLigacao));
+      JSONToSend.AddPair('groupsIgnore', VariantToJSON(ignorarGrupos));
+      JSONToSend.AddPair('alwaysOnline', VariantToJSON(sempreOnline));
+      JSONToSend.AddPair('readMessages', VariantToJSON(lerMensagens));
+      JSONToSend.AddPair('readStatus', VariantToJSON(lerStatus));
+      JSONToSend.AddPair('syncFullHistory', VariantToJSON(false));
+      JSONToSend.AddPair('msgCall', mensagemRejeitaLigacao)
+    end;
 
     // Armazenar o JSON em uma variável string para análise
     JSONString := JSONToSend.ToString;
@@ -1786,7 +1748,7 @@ end;
 function TApiEuAtendo.ObterDadosContato(const ContactID: string; out ErroMsg: string): TContato;
 var
   IdHTTP: TIdHTTP;
-  SSLHandler: TIdSSLIOHandlerSocketOpenSSL;
+  SSLHandler: TIdSSLIOHandlerSocketSChannel;
   JSONToSend, JSONObject: TJSONObject;
   JSONArray: TJSONObject;
   StringStream: TStringStream;
@@ -1800,12 +1762,11 @@ begin
   Contato.Nome := '';
   ErroMsg := '';
   IdHTTP := TIdHTTP.Create(nil);
-  SSLHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSLHandler := TIdSSLIOHandlerSocketSChannel.Create(nil);
   JSONToSend := TJSONObject.Create;
   JSONArray := nil;
   try
     IdHTTP.IOHandler := SSLHandler;
-    SSLHandler.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     IdHTTP.Request.ContentType := 'application/json';
     IdHTTP.Request.CustomHeaders.Values['User-Agent'] := 'insomnia/2023.5.8';
     IdHTTP.Request.CustomHeaders.Values['apikey'] := FChaveApi;
@@ -1868,7 +1829,7 @@ end;
 procedure TApiEuAtendo.EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao,thumburl, RodapeBotao: string; const Botoes: array of TButtonTipo);
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend, ButtonObj, OptionsJSON: TJSONObject;
   ButtonsArray: TJSONArray;
   PostDataStream: TStringStream;
@@ -1877,10 +1838,10 @@ var
   Botao: TButtonTipo;
 begin
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   NumeroDestinatario := FormatPhoneNumber(NumeroDestinatario);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -1947,7 +1908,7 @@ end;
 function TApiEuAtendo.ExistWhats(Numeros: string; out ErroMsg: string): TJSONArray;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend: TJSONObject;
   NumbersArray: TJSONArray;
   PostDataStream: TStringStream;
@@ -1960,7 +1921,7 @@ begin
   Result := nil; // Retorno inicial como nulo
   ErroMsg := ''; // Inicializa a mensagem de erro
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   JSONToSend := TJSONObject.Create;
   NumbersArray := TJSONArray.Create;
   try
@@ -1974,7 +1935,7 @@ begin
       NumbersArray.Add(NumeroTelefone);
     end;
 
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -2026,7 +1987,7 @@ end;
 function TApiEuAtendo.SendMessageGhostMentionToGroup(const GroupID, MessageText: string; out ErroMsg: string): Boolean;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend, JsonOptions, JsonTextMessage: TJSONObject;
   PostDataStream: TStringStream;
   ResponseStr: string;
@@ -2034,13 +1995,13 @@ begin
   Result := False;  // Assume failure by default
   ErroMsg := '';    // Initialize error message
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   JSONToSend := TJSONObject.Create;
   JsonOptions := TJSONObject.Create;
   JsonTextMessage := TJSONObject.Create;
   try
     // Configurações SSL
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -2088,14 +2049,14 @@ end;
 function TApiEuAtendo.DeletarInstancia(nomeInstancia: string): Boolean;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
 begin
   Result := False;  // Assume failure by default
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
     try
@@ -2115,14 +2076,14 @@ end;
 function TApiEuAtendo.DeslogarInstancia(): Boolean;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
 begin
   Result := False;  // Assume failure by default
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
     try
@@ -2141,14 +2102,14 @@ end;
 function TApiEuAtendo.ReiniciarInstancia(): Boolean;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
 begin
   Result := False;  // Assume failure by default
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
     try
@@ -2169,26 +2130,39 @@ end;
 function TApiEuAtendo.StatusInstancia(): TInstanceStatus;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
   ResponseJSON, InstanceJSON: TJSONObject;
   StatusData: TInstanceStatus;
 begin
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
     ResponseStr := HTTP.Get(FEvolutionApiURL + '/instance/connectionState/' + FNomeInstancia);
     ResponseJSON := TJSONObject.ParseJSONValue(ResponseStr) as TJSONObject;
-    try
-      InstanceJSON := ResponseJSON.GetValue<TJSONObject>('instance');
-      StatusData.InstanceName := InstanceJSON.GetValue<string>('instanceName');
-      StatusData.State := InstanceJSON.GetValue<string>('state');
-      DoStatusInstancia(StatusData);
-    finally
-      ResponseJSON.Free;
+    if HTTP.ResponseCode = 200 then
+    begin
+      try
+        InstanceJSON := ResponseJSON.GetValue<TJSONObject>('instance');
+        StatusData.InstanceName := InstanceJSON.GetValue<string>('instanceName');
+        StatusData.State := InstanceJSON.GetValue<string>('state');
+        DoStatusInstancia(StatusData);
+      finally
+        ResponseJSON.Free;
+      end;
+    end
+    else
+    begin
+      try
+        InstanceJSON := ResponseJSON.GetValue<TJSONObject>('response');
+        StatusData.State:= 'notfound';
+        StatusData.StateMessage:= InstanceJSON.GetValue<string>('message[0]');
+        DoStatusInstancia(StatusData);
+      finally
+        ResponseJSON.Free;
+      end;
     end;
   finally
     SSL.Free;
@@ -2205,15 +2179,15 @@ begin
     procedure
     var
       HTTP: TIdHTTP;
-      SSL: TIdSSLIOHandlerSocketOpenSSL;
+      SSL: TIdSSLIOHandlerSocketSChannel;
       ResponseStr: string;
       ResponseJSON: TJSONObject;
       Base64: string;
     begin
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       try
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
         ResponseStr := HTTP.Get(FEvolutionApiURL + '/instance/connect/' + FNomeInstancia);
@@ -2233,10 +2207,37 @@ begin
   MyThread.Start;
 end;
 
+function TApiEuAtendo.ObterQrCode64: string;
+var
+  HTTP: TIdHTTP;
+  SSL: TIdSSLIOHandlerSocketSChannel;
+  ResponseStr: string;
+  ResponseJSON: TJSONObject;
+  Base64: string;
+begin
+  HTTP := TIdHTTP.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
+
+  try
+    HTTP.IOHandler := SSL;
+    HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+    ResponseStr := HTTP.Get(FEvolutionApiURL + '/instance/connect/' + FNomeInstancia);
+    ResponseJSON := TJSONObject.ParseJSONValue(ResponseStr) as TJSONObject;
+    try
+      Result := ResponseJSON.GetValue<string>('base64');
+    finally
+      ResponseJSON.Free;
+    end;
+  finally
+    SSL.Free;
+    HTTP.Free;
+  end;
+end;
+
 function TApiEuAtendo.EnviarLista(NumeroTelefone, Titulo, Descricao, TextoBotao, TextoRodape: string; Secoes: TJSONArray): Boolean;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend, OptionsJSON, ListMessageJSON: TJSONObject;
   PostDataStream: TStringStream;
   Response: string;
@@ -2247,9 +2248,9 @@ begin
      Result := False;  // Assume failure by default
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       try
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
@@ -2288,9 +2289,9 @@ begin
     Result := False;  // Assume failure by default
       NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
       HTTP := TIdHTTP.Create(nil);
-      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
       try
-        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+
         HTTP.IOHandler := SSL;
         HTTP.Request.ContentType := 'application/json';
         HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);

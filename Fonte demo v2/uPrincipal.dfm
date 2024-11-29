@@ -140,7 +140,7 @@ object Form9: TForm9
     Top = 102
     Width = 612
     Height = 267
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     TabOrder = 6
     object TabSheet7: TTabSheet
       Caption = 'Configuracoes'
