@@ -242,7 +242,7 @@ procedure Register;
 implementation
 
 uses
-  uFunctions;
+  uFunctions, Execute.IdSSLSChannel;
 
   const
   VERSAO_COMPONENTE = '2.0.0';
@@ -454,7 +454,7 @@ end;
 procedure TApiEuAtendo.obterInstancias;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   ResponseStr: string;
   JSONArray: TJSONArray;
   Instances: TInstances;
@@ -464,9 +464,8 @@ var
   OwnerJid: string;
 begin
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
     ResponseStr := HTTP.Get(FEvolutionApiURL + '/instance/fetchInstances');
@@ -1566,7 +1565,7 @@ end;
 function TApiEuAtendo.CriarInstancia(out ErrorMsg: string): Boolean;
 var
   HTTP: TIdHTTP;
-  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  SSL: TIdSSLIOHandlerSocketSChannel;
   JSONToSend, ResponseJSON, InstanceJSON, HashJSON: TJSONObject;
   JSONString: string;
   ResponseStr: string;
@@ -1585,11 +1584,10 @@ begin
 
 
   HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  SSL := TIdSSLIOHandlerSocketSChannel.Create(nil);
   JSONToSend := TJSONObject.Create;
   ResponseJSON := nil;
   try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
     HTTP.IOHandler := SSL;
     HTTP.Request.ContentType := 'application/json';
     HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);

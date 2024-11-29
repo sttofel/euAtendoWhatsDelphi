@@ -38,6 +38,9 @@ requires
 
 contains
   ApiEuAtendo in 'ApiEuAtendo.pas',
-  uFunctions in 'uFunctions.pas';
+  uFunctions in 'uFunctions.pas',
+  Execute.IdSSLSChannel in 'lib\Execute.IdSSLSChannel.pas',
+  Execute.SChannel in 'lib\Execute.SChannel.pas',
+  Execute.WinSSPI in 'lib\Execute.WinSSPI.pas';
 
 end.

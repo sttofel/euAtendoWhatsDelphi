@@ -10,7 +10,9 @@ object Form9: TForm9
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  OldCreateOrder = True
   OnCreate = FormCreate
+  PixelsPerInch = 96
   TextHeight = 15
   object Shape1: TShape
     Left = 662
@@ -138,7 +140,7 @@ object Form9: TForm9
     Top = 102
     Width = 612
     Height = 267
-    ActivePage = TabSheet7
+    ActivePage = TabSheet1
     TabOrder = 6
     object TabSheet7: TTabSheet
       Caption = 'Configuracoes'
