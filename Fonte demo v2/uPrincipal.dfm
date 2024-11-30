@@ -180,7 +180,7 @@ object Form9: TForm9
         Caption = 'Vers'#227'o da API'
       end
       object edtApiGlobal: TEdit
-        Left = 160
+        Left = 165
         Top = 112
         Width = 249
         Height = 23
@@ -189,7 +189,7 @@ object Form9: TForm9
         OnExit = edtApiGlobalExit
       end
       object edtUrl: TEdit
-        Left = 160
+        Left = 165
         Top = 162
         Width = 249
         Height = 23
