@@ -60,7 +60,7 @@ erro:String;
 begin
   //passamos pro componente o nome q queremos dá a instancia, nao pode ter espacos nem caracter especial
   euatendo.NomeInstancia := edtNomeInstancia.Text;
-
+  euatendo.ChaveApi := edtSenha.Text;
   euAtendo.CriarInstancia(erro);
 
   if erro <> '' then
