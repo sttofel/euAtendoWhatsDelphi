@@ -138,7 +138,7 @@ object Form9: TForm9
     Top = 102
     Width = 612
     Height = 267
-    ActivePage = TabSheet7
+    ActivePage = TabSheet2
     TabOrder = 6
     object TabSheet7: TTabSheet
       Caption = 'Configuracoes'
@@ -180,21 +180,21 @@ object Form9: TForm9
         Caption = 'Vers'#227'o da API'
       end
       object edtApiGlobal: TEdit
-        Left = 165
+        Left = 160
         Top = 112
         Width = 249
         Height = 23
         TabOrder = 0
-        Text = '731c573a3b28f00380b9e4306599bf73'
+        Text = 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1'
         OnExit = edtApiGlobalExit
       end
       object edtUrl: TEdit
-        Left = 165
+        Left = 160
         Top = 162
         Width = 249
         Height = 23
         TabOrder = 1
-        Text = 'https://demo2.apieuatendo.com.br'
+        Text = 'https://apiv2demo.apicomponente.com.br'
         OnExit = edtUrlExit
       end
       object cbVersao: TComboBox

@@ -133,7 +133,6 @@ type
     procedure btFakeCallClick(Sender: TObject);
     procedure DBGrid1DblClick(Sender: TObject);
   private
-    procedure LoadBase64ToImage(const Base64: string; Image: TImage);
     procedure ApplyBestFit(Grid: TDBGrid);
     function SaveImageFromURLToDisk(const ImageURL, NumeroContato
       : string): string;
@@ -150,37 +149,6 @@ implementation
 
 {$R *.dfm}
 
-procedure TForm9.LoadBase64ToImage(const Base64: string; Image: TImage);
-var
-  CleanedBase64: string;
-  Input: TStringStream;
-  Output: TMemoryStream;
-  Img: TPNGImage;
-begin
-  CleanedBase64 := Base64.Replace('data:image/png;base64,', '', [rfIgnoreCase]);
-
-  Input := TStringStream.Create(CleanedBase64, TEncoding.ASCII);
-  try
-    Output := TMemoryStream.Create;
-    try
-      TNetEncoding.Base64.Decode(Input, Output);
-      Output.Position := 0;
-
-      Img := TPNGImage.Create;
-      try
-        Img.LoadFromStream(Output);
-        Image.Picture.Assign(Img);
-      finally
-        Img.Free;
-      end;
-
-    finally
-      Output.Free;
-    end;
-  finally
-    Input.Free;
-  end;
-end;
 
 procedure TForm9.ApiEuAtendo1CriarInstancia(Sender: TObject;
   const InstanceResponse: TInstanceResponse);
@@ -316,7 +284,7 @@ end;
 procedure TForm9.ApiEuAtendo1ObterQrCode(Sender: TObject;
   const Base64QRCode: string);
 begin
-  LoadBase64ToImage(Base64QRCode, Image1);
+  ApiEuAtendo1.LoadBase64ToImage(Base64QRCode,Image1)
 end;
 
 procedure TForm9.ApiEuAtendo1StatusInstancia(Sender: TObject;

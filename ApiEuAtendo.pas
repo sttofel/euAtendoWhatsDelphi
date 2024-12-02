@@ -14,7 +14,7 @@ uses
   System.NetEncoding, IdSSLOpenSSL, IdCoderMIME, VCL.Graphics ,Vcl.ExtCtrls, VCL.Imaging.jpeg
   //baixar imagem disco
   ,System.Net.HttpClientComponent,System.Net.HttpClient
-  ,System.Generics.Collections
+  ,System.Generics.Collections,Vcl.Imaging.pngimage
   ;
 
   type
@@ -180,6 +180,7 @@ end;
     procedure DoObterContatos(const Contatos: TContatos);
     function GetVersao: string;
   public
+    procedure LoadBase64ToImage(const Base64: string; Image: TImage);
   function FazerLigacao(NumeroTelefone: String; Duracao: integer): String;
    procedure EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao,thumburl,
       RodapeBotao: string; const Botoes: array of TButtonTipo);
@@ -1404,6 +1405,38 @@ begin
   finally
     SSL.Free;
     HTTP.Free;
+  end;
+end;
+
+procedure TApiEuAtendo.LoadBase64ToImage(const Base64: string; Image: TImage);
+var
+  CleanedBase64: string;
+  Input: TStringStream;
+  Output: TMemoryStream;
+  Img: TPNGImage;
+begin
+  CleanedBase64 := Base64.Replace('data:image/png;base64,', '', [rfIgnoreCase]);
+
+  Input := TStringStream.Create(CleanedBase64, TEncoding.ASCII);
+  try
+    Output := TMemoryStream.Create;
+    try
+      TNetEncoding.Base64.Decode(Input, Output);
+      Output.Position := 0;
+
+      Img := TPNGImage.Create;
+      try
+        Img.LoadFromStream(Output);
+        Image.Picture.Assign(Img);
+      finally
+        Img.Free;
+      end;
+
+    finally
+      Output.Free;
+    end;
+  finally
+    Input.Free;
   end;
 end;
 
