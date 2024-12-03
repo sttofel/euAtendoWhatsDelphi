@@ -246,7 +246,7 @@ uses
   uFunctions;
 
   const
-  VERSAO_COMPONENTE = '2.0.0';
+  VERSAO_COMPONENTE = '2.0.1';
 
 function TApiEuAtendo.GetVersion: TVersionOption;
 begin
@@ -1641,12 +1641,13 @@ begin
 
     if (UrlTypebot <> '') and (NomeTypeBot <> '') then
     begin
-      JSONToSend.AddPair('typebotUrl', UrlTypebot);
+      JSONToSend.AddPair('typebot_url', UrlTypebot);
       JSONToSend.AddPair('typebot', NomeTypeBot);
-      JSONToSend.AddPair('typebotExpire', TJSONNumber.Create(60));
-      JSONToSend.AddPair('typebotKeywordFinish', '#SAIR');
-      JSONToSend.AddPair('typebotDelayMessage', TJSONNumber.Create(1000));
-      JSONToSend.AddPair('typebotUnknownMessage', FTypeBotMensagemNaoEntendeu);
+      JSONToSend.AddPair('typebot_expire', TJSONNumber.Create(60));
+      JSONToSend.AddPair('typebot_keyword_finish', '#SAIR');
+      JSONToSend.AddPair('typebot_delay_message', TJSONNumber.Create(1000));
+      JSONToSend.AddPair('typebot_unknown_message', FTypeBotMensagemNaoEntendeu);
+      JSONToSend.AddPair('typebot_listening_from_me', false);
     end;
 
     // Convert JSON to string
