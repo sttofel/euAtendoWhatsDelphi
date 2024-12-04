@@ -1647,7 +1647,7 @@ begin
       JSONToSend.AddPair('typebot_keyword_finish', '#SAIR');
       JSONToSend.AddPair('typebot_delay_message', TJSONNumber.Create(1000));
       JSONToSend.AddPair('typebot_unknown_message', FTypeBotMensagemNaoEntendeu);
-      JSONToSend.AddPair('typebot_listening_from_me', false);
+      JSONToSend.AddPair('typebot_listening_from_me', VariantToJSON(false));
     end;
 
     // Convert JSON to string
