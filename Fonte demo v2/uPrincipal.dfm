@@ -138,7 +138,7 @@ object Form9: TForm9
     Top = 102
     Width = 612
     Height = 267
-    ActivePage = TabSheet2
+    ActivePage = TabSheet7
     TabOrder = 6
     object TabSheet7: TTabSheet
       Caption = 'Configuracoes'
@@ -173,7 +173,7 @@ object Form9: TForm9
         WordWrap = True
       end
       object Label13: TLabel
-        Left = 197
+        Left = 160
         Top = 202
         Width = 71
         Height = 15
@@ -185,7 +185,7 @@ object Form9: TForm9
         Width = 249
         Height = 23
         TabOrder = 0
-        Text = 'ASD3F21APIDEVS6A5SPAULOJRDEVFA1'
+        Text = '9bb2b5203266a594dfbe41597c7ff0f2'
         OnExit = edtApiGlobalExit
       end
       object edtUrl: TEdit
@@ -194,21 +194,30 @@ object Form9: TForm9
         Width = 249
         Height = 23
         TabOrder = 1
-        Text = 'https://apiv2demo.apicomponente.com.br'
+        Text = 'https://demo1.apieuatendo.com.br'
         OnExit = edtUrlExit
       end
       object cbVersao: TComboBox
-        Left = 288
+        Left = 245
         Top = 199
         Width = 81
         Height = 23
-        ItemIndex = 1
+        ItemIndex = 0
         TabOrder = 2
-        Text = 'V2'
+        Text = 'V1'
         OnChange = cbVersaoChange
         Items.Strings = (
           'V1'
           'V2')
+      end
+      object Button25: TButton
+        Left = 338
+        Top = 198
+        Width = 75
+        Height = 25
+        Caption = 'Obter vers'#227'o'
+        TabOrder = 3
+        OnClick = Button25Click
       end
     end
     object TabSheet1: TTabSheet

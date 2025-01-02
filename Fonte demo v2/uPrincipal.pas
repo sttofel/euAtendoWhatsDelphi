@@ -86,6 +86,7 @@ type
     Label15: TLabel;
     Label16: TLabel;
     Button24: TButton;
+    Button25: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure ApiEuAtendo1ObterQrCode(Sender: TObject;
@@ -134,6 +135,7 @@ type
     procedure btFakeCallClick(Sender: TObject);
     procedure DBGrid1DblClick(Sender: TObject);
     procedure Button24Click(Sender: TObject);
+    procedure Button25Click(Sender: TObject);
   private
     procedure ApplyBestFit(Grid: TDBGrid);
     function SaveImageFromURLToDisk(const ImageURL, NumeroContato
@@ -872,8 +874,14 @@ begin
       -47.9434    // Longitude
     );
 
+end;
 
-
+procedure TForm9.Button25Click(Sender: TObject);
+var
+versao:String;
+begin
+versao := ApiEuAtendo1.ObterVersaoServidor;
+showmessage('Seu servidor é v:' + versao);
 end;
 
 procedure TForm9.Button20Click(Sender: TObject);

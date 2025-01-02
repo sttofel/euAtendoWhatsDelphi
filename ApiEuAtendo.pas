@@ -18,7 +18,7 @@ uses
   ;
 
   type
-   TVersionOption = (V1, V2); // Enum com as versões disponíveis
+  TVersionOption = (V1, V2, Unknown); // Enum com as versões disponíveis
 
 type
   TInstanceStatus = record
@@ -180,6 +180,7 @@ end;
     procedure DoObterContatos(const Contatos: TContatos);
     function GetVersao: string;
   public
+  function ObterVersaoServidor: string;
   function EnviarLocalizacao(NumeroTelefone, Nome, Endereco: string; Latitude,
       Longitude: Double): string;
     procedure LoadBase64ToImage(const Base64: string; Image: TImage);
@@ -1441,6 +1442,63 @@ begin
     Input.Free;
   end;
 end;
+
+function TApiEuAtendo.ObterVersaoServidor: string;
+var
+  HTTP: TIdHTTP;
+  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  Response: string;
+  ResponseJSON: TJSONObject;
+  Versao: string;
+begin
+  Result := ''; // Assume falha por padrão
+  HTTP := TIdHTTP.Create(nil);
+  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  try
+    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+    HTTP.IOHandler := SSL;
+    HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+
+    try
+      Response := HTTP.Get(FEvolutionApiURL);
+      ResponseJSON := TJSONObject.ParseJSONValue(Response) as TJSONObject;
+      try
+        if Assigned(ResponseJSON) then
+        begin
+          Versao := ResponseJSON.GetValue<string>('version');
+          if Versao.StartsWith('2') then
+          begin
+            Result := Versao;
+            FVersion := TVersionOption.V2; // Atribui a versão 2
+          end
+          else if Versao.StartsWith('1') then
+          begin
+            Result := Versao;
+            FVersion := TVersionOption.V1; // Atribui a versão 1
+          end
+          else
+          begin
+            Result := 'Versão desconhecida: ' + Versao;
+            FVersion := TVersionOption.Unknown; // Define como desconhecida
+          end;
+        end;
+      finally
+        ResponseJSON.Free;
+      end;
+    except
+      on E: Exception do
+      begin
+        Result := 'Erro: ' + E.Message;
+        FVersion := TVersionOption.Unknown; // Define como desconhecida em caso de erro
+      end;
+    end;
+  finally
+    SSL.Free;
+    HTTP.Free;
+  end;
+end;
+
+
 
 function TApiEuAtendo.EnviarLocalizacao(NumeroTelefone, Nome, Endereco: string; Latitude, Longitude: Double): string;
 var
