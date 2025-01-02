@@ -85,6 +85,7 @@ type
     Label14: TLabel;
     Label15: TLabel;
     Label16: TLabel;
+    Button24: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure ApiEuAtendo1ObterQrCode(Sender: TObject;
@@ -132,6 +133,7 @@ type
     procedure Button23Click(Sender: TObject);
     procedure btFakeCallClick(Sender: TObject);
     procedure DBGrid1DblClick(Sender: TObject);
+    procedure Button24Click(Sender: TObject);
   private
     procedure ApplyBestFit(Grid: TDBGrid);
     function SaveImageFromURLToDisk(const ImageURL, NumeroContato
@@ -404,12 +406,9 @@ begin
         ResponseItem := ResponseArray.Items[I] as TJSONObject;
 
         ClientDataSet1.Append;
-        ClientDataSet1.FieldByName('Number').AsString :=
-          ResponseItem.GetValue<string>('number');
-        ClientDataSet1.FieldByName('JID').AsString :=
-          ResponseItem.GetValue<string>('jid');
-        ClientDataSet1.FieldByName('Exists').AsString :=
-          BoolToStr(ResponseItem.GetValue<Boolean>('exists'), True);
+        ClientDataSet1.FieldByName('Number').AsString := ResponseItem.GetValue<string>('number');
+        ClientDataSet1.FieldByName('JID').AsString := ResponseItem.GetValue<string>('jid');
+        ClientDataSet1.FieldByName('Exists').AsString := BoolToStr(ResponseItem.GetValue<Boolean>('exists'), True);
 
         if ResponseItem.TryGetValue<string>('name', ErroMsg) then
           ClientDataSet1.FieldByName('Name').AsString := ErroMsg
@@ -860,6 +859,21 @@ begin
   ApiEuAtendo1.EnviarBotao(edtNumeroContato.Text, 'Título', 'Descrição',
     'https://s33.apidevs.app/euatendo/10.png', 'Rodapé',
     [Botao1, Botao2, Botao3]);
+end;
+
+procedure TForm9.Button24Click(Sender: TObject);
+begin
+
+    ApiEuAtendo1.EnviarLocalizacao(
+      '559982385000',        // Número do telefone
+      'Zoologico de Brasilia',           // Nome do local
+      'Avenida das Nações, Via L 4 Sul s/n - Candangolândia, Brasília - DF, 70610-100',   // Endereço
+      -15.84457,   // Latitude
+      -47.9434    // Longitude
+    );
+
+
+
 end;
 
 procedure TForm9.Button20Click(Sender: TObject);

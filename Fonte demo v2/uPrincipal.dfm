@@ -405,6 +405,15 @@ object Form9: TForm9
           'do WhatsApp')
         TabOrder = 7
       end
+      object Button24: TButton
+        Left = 17
+        Top = 211
+        Width = 282
+        Height = 25
+        Caption = 'Enviar localiza'#231#227'o'
+        TabOrder = 8
+        OnClick = Button24Click
+      end
     end
     object TabSheet3: TTabSheet
       Caption = 'Dados'

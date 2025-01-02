@@ -180,6 +180,8 @@ end;
     procedure DoObterContatos(const Contatos: TContatos);
     function GetVersao: string;
   public
+  function EnviarLocalizacao(NumeroTelefone, Nome, Endereco: string; Latitude,
+      Longitude: Double): string;
     procedure LoadBase64ToImage(const Base64: string; Image: TImage);
   function FazerLigacao(NumeroTelefone: String; Duracao: integer): String;
    procedure EnviarBotao(NumeroDestinatario, TituloBotao, DescricaoBotao,thumburl,
@@ -1440,6 +1442,121 @@ begin
   end;
 end;
 
+function TApiEuAtendo.EnviarLocalizacao(NumeroTelefone, Nome, Endereco: string; Latitude, Longitude: Double): string;
+var
+  HTTP: TIdHTTP;
+  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  JSONToSend, OptionsJSON, LocationMessageJSON: TJSONObject;
+  PostDataStream: TStringStream;
+  Response: string;
+  ResponseJSON, KeyJSON: TJSONObject;
+begin
+  Result := '';  // Assume failure by default
+
+  if FVersion = TVersionOption.V1 then
+  begin
+    HTTP := TIdHTTP.Create(nil);
+    SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+    NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
+    try
+      SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+      HTTP.IOHandler := SSL;
+      HTTP.Request.ContentType := 'application/json';
+      HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+
+      JSONToSend := TJSONObject.Create;
+      try
+        JSONToSend.AddPair('number', NumeroTelefone);
+
+        // Adicionar "options" ao JSON
+        OptionsJSON := TJSONObject.Create;
+        OptionsJSON.AddPair('delay', TJSONNumber.Create(1200));
+        OptionsJSON.AddPair('presence', 'composing');
+        JSONToSend.AddPair('options', OptionsJSON);
+
+        // Adicionar "locationMessage" ao JSON
+        LocationMessageJSON := TJSONObject.Create;
+        LocationMessageJSON.AddPair('name', Nome);
+        LocationMessageJSON.AddPair('address', Endereco);
+        LocationMessageJSON.AddPair('latitude', TJSONNumber.Create(Latitude));
+        LocationMessageJSON.AddPair('longitude', TJSONNumber.Create(Longitude));
+        JSONToSend.AddPair('locationMessage', LocationMessageJSON);
+
+        PostDataStream := TStringStream.Create(JSONToSend.ToString, TEncoding.UTF8);
+        try
+          Response := HTTP.Post(FEvolutionApiURL + '/message/sendLocation/' + FNomeInstancia, PostDataStream);
+
+          // Analisar a resposta JSON e extrair o ID da mensagem
+          ResponseJSON := TJSONObject.ParseJSONValue(Response) as TJSONObject;
+          try
+            if ResponseJSON.TryGetValue('key', KeyJSON) then
+            begin
+              Result := KeyJSON.GetValue<string>('id');
+            end;
+          finally
+            ResponseJSON.Free;
+          end;
+        finally
+          PostDataStream.Free;
+        end;
+      finally
+        JSONToSend.Free;
+      end;
+    finally
+      SSL.Free;
+      HTTP.Free;
+    end;
+  end;
+
+  if FVersion = TVersionOption.V2 then
+  begin
+    HTTP := TIdHTTP.Create(nil);
+    SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+    NumeroTelefone := FormatPhoneNumber(NumeroTelefone);
+    try
+      SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+      HTTP.IOHandler := SSL;
+      HTTP.Request.ContentType := 'application/json';
+      HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+
+      JSONToSend := TJSONObject.Create;
+      try
+        JSONToSend.AddPair('number', NumeroTelefone);
+        JSONToSend.AddPair('name', Nome);
+        JSONToSend.AddPair('address', Endereco);
+        JSONToSend.AddPair('latitude', TJSONNumber.Create(Latitude));
+        JSONToSend.AddPair('longitude', TJSONNumber.Create(Longitude));
+
+        PostDataStream := TStringStream.Create(JSONToSend.ToString, TEncoding.UTF8);
+        try
+          Response := HTTP.Post(FEvolutionApiURL + '/message/sendLocation/' + FNomeInstancia, PostDataStream);
+
+          // Analisar a resposta JSON e extrair o ID da mensagem
+          ResponseJSON := TJSONObject.ParseJSONValue(Response) as TJSONObject;
+          try
+            if ResponseJSON.TryGetValue('key', KeyJSON) then
+            begin
+              Result := KeyJSON.GetValue<string>('id');
+            end;
+          finally
+            ResponseJSON.Free;
+          end;
+        finally
+          PostDataStream.Free;
+        end;
+      finally
+        JSONToSend.Free;
+      end;
+    finally
+      SSL.Free;
+      HTTP.Free;
+    end;
+  end;
+end;
+
+
+
+
 function TApiEuAtendo.EnviarMensagemDeTexto(NumeroTelefone, Mensagem: string): string;
 var
   HTTP: TIdHTTP;
@@ -2180,24 +2297,58 @@ var
   SSL: TIdSSLIOHandlerSocketOpenSSL;
   ResponseStr: string;
 begin
-  Result := False;  // Assume failure by default
-  HTTP := TIdHTTP.Create(nil);
-  SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-  try
-    SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
-    HTTP.IOHandler := SSL;
-    HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
+
+ if FVersion = TVersionOption.V1 then
+   begin
+     Result := False;  // Assume failure by default
+    HTTP := TIdHTTP.Create(nil);
+    SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
     try
-      ResponseStr := HTTP.Put(FEvolutionApiURL + '/instance/restart/' + NomeInstancia, TStringStream.Create(''));
-      Result := HTTP.ResponseCode = 200;  // Assume success if HTTP response code is 200
-    except
-      on E: Exception do
-        Result := False;  // On exception, assume failure
+      SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+      HTTP.IOHandler := SSL;
+      HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
+      try
+        ResponseStr := HTTP.Put(FEvolutionApiURL + '/instance/restart/' + NomeInstancia, TStringStream.Create(''));
+        Result := HTTP.ResponseCode = 200;  // Assume success if HTTP response code is 200
+      except
+        on E: Exception do
+          Result := False;  // On exception, assume failure
+      end;
+    finally
+      SSL.Free;
+      HTTP.Free;
     end;
-  finally
-    SSL.Free;
-    HTTP.Free;
-  end;
+   end
+   else
+   begin
+     Result := False;  // Assume failure by default
+      HTTP := TIdHTTP.Create(nil);
+      SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+      try
+        SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+        HTTP.IOHandler := SSL;
+        HTTP.Request.CustomHeaders.AddValue('apikey', FGlobalAPI);
+        try
+          ResponseStr := HTTP.POST(FEvolutionApiURL + '/instance/restart/' + NomeInstancia, TStringStream.Create(''));
+          Result := HTTP.ResponseCode = 200;  // Assume success if HTTP response code is 200
+        except
+          on E: Exception do
+            Result := False;  // On exception, assume failure
+        end;
+      finally
+        SSL.Free;
+        HTTP.Free;
+      end;
+   end;
+
+
+
+
+
+
+
+
+
 end;
 
 
@@ -2352,6 +2503,8 @@ begin
     end;
 
 end;
+
+
 
 
 procedure Register;
