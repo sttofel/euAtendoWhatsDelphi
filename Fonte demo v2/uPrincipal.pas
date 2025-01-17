@@ -12,7 +12,10 @@ uses
   // Usado para baixar arquivos diretamente para o disco
   System.Net.HttpClientComponent, System.Net.HttpClient, System.NetEncoding,
   // Usado para enviar menu e lista
-  System.JSON, Data.DB, Datasnap.DBClient, Vcl.Grids, Vcl.DBGrids, Vcl.ComCtrls;
+  System.JSON, Data.DB, Datasnap.DBClient, Vcl.Grids, Vcl.DBGrids, Vcl.ComCtrls,
+  //usado na funcao do typebot
+  System.Generics.Collections
+  ;
 
 type
   TForm9 = class(TForm)
@@ -87,6 +90,7 @@ type
     Label16: TLabel;
     Button24: TButton;
     Button25: TButton;
+    Button26: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure ApiEuAtendo1ObterQrCode(Sender: TObject;
@@ -136,6 +140,7 @@ type
     procedure DBGrid1DblClick(Sender: TObject);
     procedure Button24Click(Sender: TObject);
     procedure Button25Click(Sender: TObject);
+    procedure Button26Click(Sender: TObject);
   private
     procedure ApplyBestFit(Grid: TDBGrid);
     function SaveImageFromURLToDisk(const ImageURL, NumeroContato
@@ -882,6 +887,23 @@ versao:String;
 begin
 versao := ApiEuAtendo1.ObterVersaoServidor;
 showmessage('Seu servidor é v:' + versao);
+end;
+
+procedure TForm9.Button26Click(Sender: TObject);
+var
+  Variaveis: TArray<TPair<string, string>>;
+  Resposta: string;
+begin
+  Variaveis := [
+                  TPair<string, string>.Create('nome', 'Paulo junior'),
+                  TPair<string, string>.Create('vencimento', '17/01/2025'),
+                  TPair<string, string>.Create('valor', '59,90')
+                ];
+
+  Resposta := ApiEuAtendo1.ChamarFluxoTypebot(edtNumeroContato.Text, 'acao-componente-07f0x1f', Variaveis, True);
+
+  ApiEuAtendo1.EnviarMensagemDeTexto('559982385000','testei o envio de fluxo');
+
 end;
 
 procedure TForm9.Button20Click(Sender: TObject);

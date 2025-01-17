@@ -120,9 +120,9 @@ object Form9: TForm9
   end
   object DBGrid1: TDBGrid
     Left = 24
-    Top = 371
+    Top = 424
     Width = 612
-    Height = 269
+    Height = 216
     DataSource = DataSource1
     Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
     TabOrder = 5
@@ -137,8 +137,8 @@ object Form9: TForm9
     Left = 24
     Top = 102
     Width = 612
-    Height = 267
-    ActivePage = TabSheet7
+    Height = 307
+    ActivePage = TabSheet2
     TabOrder = 6
     object TabSheet7: TTabSheet
       Caption = 'Configuracoes'
@@ -422,6 +422,15 @@ object Form9: TForm9
         Caption = 'Enviar localiza'#231#227'o'
         TabOrder = 8
         OnClick = Button24Click
+      end
+      object Button26: TButton
+        Left = 17
+        Top = 242
+        Width = 282
+        Height = 25
+        Caption = 'Enviar fluxo typebot'
+        TabOrder = 9
+        OnClick = Button26Click
       end
     end
     object TabSheet3: TTabSheet
