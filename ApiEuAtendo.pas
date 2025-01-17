@@ -180,6 +180,8 @@ end;
     procedure DoObterContatos(const Contatos: TContatos);
     function GetVersao: string;
   public
+  function ChamarFluxoTypebot(RemoteJid, TypebotName: string;
+      Variaveis: TArray<TPair<string, string>>; StartSession: Boolean): string;
   function ObterVersaoServidor: string;
   function EnviarLocalizacao(NumeroTelefone, Nome, Endereco: string; Latitude,
       Longitude: Double): string;
@@ -1713,9 +1715,70 @@ begin
       end;
     end;
 
-
-
 end;
+
+function TApiEuAtendo.ChamarFluxoTypebot(RemoteJid, TypebotName: string; Variaveis: TArray<TPair<string, string>>; StartSession: Boolean): string;
+var
+  HTTP: TIdHTTP;
+  SSL: TIdSSLIOHandlerSocketOpenSSL;
+  JSONToSend, VariableObject: TJSONObject;
+  VariableArray: TJSONArray;
+  PostDataStream: TStringStream;
+  Response: string;
+  Variable: TPair<string, string>;
+begin
+  Result := ''; // Assume failure by default
+
+  if FVersion = TVersionOption.V1 then
+  begin
+    HTTP := TIdHTTP.Create(nil);
+    SSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+    RemoteJid := FormatPhoneNumber(RemoteJid);
+    try
+      // Configurar SSL
+      SSL.SSLOptions.SSLVersions := [sslvTLSv1, sslvTLSv1_1, sslvTLSv1_2];
+      HTTP.IOHandler := SSL;
+      HTTP.Request.ContentType := 'application/json';
+      HTTP.Request.CustomHeaders.AddValue('apikey', FChaveApi);
+
+      // Criar JSON para enviar
+      JSONToSend := TJSONObject.Create;
+      try
+        JSONToSend.AddPair('url', 'https://view.apidevs.app');
+        JSONToSend.AddPair('typebot', TypebotName);
+        JSONToSend.AddPair('remoteJid', RemoteJid+'@s.whatsapp.net');
+        JSONToSend.AddPair('startSession', TJSONBool.Create(StartSession));
+
+        // Adicionar variáveis ao JSON
+        VariableArray := TJSONArray.Create;
+        for Variable in Variaveis do
+        begin
+          VariableObject := TJSONObject.Create;
+          VariableObject.AddPair('name', Variable.Key);
+          VariableObject.AddPair('value', Variable.Value);
+          VariableArray.AddElement(VariableObject);
+        end;
+        JSONToSend.AddPair('variables', VariableArray);
+
+        // Enviar requisição
+        PostDataStream := TStringStream.Create(JSONToSend.ToString, TEncoding.UTF8);
+        try
+          Response := HTTP.Post(FEvolutionApiURL + '/typebot/start/' + FNomeInstancia, PostDataStream);
+          Result := Response; // Retorna a resposta do servidor como string
+        finally
+          PostDataStream.Free;
+        end;
+      finally
+        JSONToSend.Free;
+      end;
+    finally
+      SSL.Free;
+      HTTP.Free;
+    end;
+  end;
+end;
+
+
 
 
 function TApiEuAtendo.FazerLigacao(NumeroTelefone: String; Duracao: integer): String;
