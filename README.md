@@ -4,14 +4,11 @@
 
 ## 📋 Principais Funcionalidades
 - **Envio de Mensagens**: Envie mensagens de texto e arquivos diretamente pelo WhatsApp.
+- **Envio de fluxos interativos** Envie um fluxo onde á interação com o cliente através de perguntas e respostas.
 - **Atendimento Multicanal**: Integração com Instagram e Facebook para uma experiência de atendimento completa.
 - **Respostas Automáticas**: Utilize respostas rápidas e fluxos automatizados para melhorar a eficiência.
 - **Relatórios e Monitoramento**: Acompanhe estatísticas de uso e desempenho.
 - **Integração com CRM e Outras Plataformas**: Centralize o atendimento com integrações avançadas.
-
-Contribuição do novo Layout do demo
-[https://github.com/evertonbuenolimaqueiroz](https://github.com/evertonbuenolimaqueiroz)
-
 
 🛠 Pré-requisitos
 Delphi: Versão 10 ou superior.
